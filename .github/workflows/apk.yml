@@ -1,5 +1,7 @@
 name: Gerar APK
 on: workflow_dispatch
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +25,9 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fio-de-navalha-apk
-          path: app/fio-de-navalha-app/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Publicar o APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/fio-de-navalha-app/android/app/build/outputs/apk/debug/app-debug.apk fio-de-navalha.apk
+          gh release create "v${{ github.run_number }}" fio-de-navalha.apk --title "Fio de Navalha v${{ github.run_number }}" --notes "APK de teste"
